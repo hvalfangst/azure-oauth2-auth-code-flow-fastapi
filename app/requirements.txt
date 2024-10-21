@@ -1,0 +1,7 @@
+fastapi==0.100.0        # FastAPI framework for building APIs
+uvicorn==0.23.0         # ASGI server for running FastAPI apps
+pydantic==2.3.0         # Data validation and parsing for FastAPI models
+azure-cosmos==4.3.0     # Azure Cosmos DB SDK for Python
+config~=0.5.1
+dotenv~=0.0.5
+python-dotenv~=1.0.0
