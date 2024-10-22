@@ -1,1 +1,2 @@
 /.env_oauth
+/infra/terraform.tfvars

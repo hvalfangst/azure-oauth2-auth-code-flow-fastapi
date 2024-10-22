@@ -1,10 +1,56 @@
-# Python FastAPI secured with OAuth2 Auth code flow on Azure 
+# Azure OAuth2 OIDC Auth Code Flow demonstration
+
+The goal of this repository is to demonstrate how to incorporate [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749) on Azure **WITHOUT** the use of [MSAL](https://learn.microsoft.com/en-us/entra/identity-platform/msal-overview) for learning purposes.
+In a production environment one should (almost) always use MSAL or similar battle-tested libraries, but it is vital for any software engineer to understand what is going on under the hood instead of just blindly calling a library which
+automagically solves all your needs (this also applies for frameworks).
+
+The repo contains code for both the client and the server. The client is utilizing [OpenID Connect (OIDC)](https://auth0.com/docs/authenticate/protocols/openid-connect-protocol) with 
+Auth code flow. A comprehensive guide is included on how to register the client and server on Azure Entra ID. 
 
 ## Requirements
 
 - **Platform**: x86-64, Linux/WSL
 - **Programming Language**: [Python 3](https://www.python.org/downloads/)
 - **Azure Account**: Access to [Azure Subscription](https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account)
+- **IAC Tool**: [Terraform](https://www.terraform.io/) 
+
+
+## Allocate resources
+
+The script [up](up.sh) provisions Azure resources by applying our [Terraform script](infra/terraform.tf).
+
+It is necessary to create a file named **terraform.tfvars** in the [infra](infra) directory. This file holds sensitive information
+necessary for terraform to be able to interact with your cloud resources, namely that of your tenant and subscription id. 
+An exemption for this file has been added in our [.gitignore](.gitignore) so that you do not accidentally commit it. 
+
+The file structure is as follows:
+
+![screenshot](images/terraform_tfvars.png)
+
+## Download Publish Profile
+
+Now that we have provisioned our Azure Web App resource, we may proceed to set up our CI/CD pipeline - which is used for deploying our local Python API to Azure. 
+However, we first need to download the associated the **publish profile** associated with said Azure Web App. 
+In Azure, access the newly created Web App resource.
+![screenshot](images/hvalfangst_linux_web_app.png)
+
+Click on the **Download publish profile** button in the top right corner. 
+
+![screenshot](images/publish_settings.png)
+
+The associated file contents will be utilized in the next section.
+
+## Set up CI/CD pipeline
+
+In order to deploy our Python API to Azure Web Apps, one has to create a secret named **AZURE_WEBAPP_PUBLISH_PROFILE**. A GitHub Actions Workflow script which utilizes
+this to deploy the application has [already been provided](.github/workflows/deploy.yml). Navigate to the **security** section under your GitHub repository settings. Click on **Actions** under **Secrets and variables**. 
+
+
+![screenshot](images/github_actions_secrets_and_variables.png)
+
+Proceed to create a new secret by clicking on the green **New repository secret** button. Secret name must be as specified. Copy & paste the contents of the recently downloaded publish profile to the secret field.
+
+![screenshot](images/github_actions_new_secret.png)
 
 
 ## Register API on Azure AD
