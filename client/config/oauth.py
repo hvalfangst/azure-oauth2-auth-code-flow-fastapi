@@ -1,19 +1,11 @@
-import logging
+# client/config/oauth.py
 
 from dotenv import load_dotenv
 from fastapi import HTTPException
 from pydantic_settings import BaseSettings
+from client import logger
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-logger = logging.getLogger(__name__)
-
-# Load environment variables from .env file
 load_dotenv()
-
 
 class OAuthSettings(BaseSettings):
     AZURE_CLIENT_ID: str
@@ -33,18 +25,19 @@ def initialize_oauth_settings():
 
         # Check if the required OAuth fields are set
         if not internal_oauth_settings.AZURE_CLIENT_ID or not internal_oauth_settings.AZURE_CLIENT_SECRET or not internal_oauth_settings.AZURE_TENANT_ID or not internal_oauth_settings.API_SCOPE:
-            logger.error("One or more required OAuth environment variables are missing.")
+            logger.logger.error("One or more required OAuth environment variables are missing.")
             raise HTTPException(status_code=500,
                                 detail="Configuration error: Required OAuth environment variables are missing.")
 
-        logger.info("OAuth settings loaded successfully.")
+        logger.logger.info("OAuth settings loaded successfully.")
         return internal_oauth_settings
     except FileNotFoundError:
-        logger.critical(".env file not found.")
+        logger.logger.critical(".env file not found.")
         raise HTTPException(status_code=500, detail="Configuration error: .env file not found.")
     except Exception as e:
-        logger.critical(f"Error loading OAuth settings: {e}")
-        raise HTTPException(status_code=500, detail="Configuration error: An error occurred while loading OAuth settings.")
+        logger.logger.critical(f"Error loading OAuth settings: {e}")
+        raise HTTPException(status_code=500,
+                            detail="Configuration error: An error occurred while loading OAuth settings.")
 
 
 # Initialize OAuth settings

@@ -1,19 +1,23 @@
+# client/services/auth_service.py
+
 # Set up constants for OAuth2
 import webbrowser
 from typing import List
 from urllib.parse import urlencode
 
 import httpx
+import jwt
 from fastapi import HTTPException
 from fastapi.security import OAuth2AuthorizationCodeBearer
 
-from app.config import oauth_settings
-from app.logger import logger
-from app.services.token_storage import DECODED_TOKEN
+from client.config import oauth_settings
+from client.logger import logger
+from client.services.token_storage import DECODED_TOKEN
 
 AUTHORITY = f"https://login.microsoftonline.com/{oauth_settings.AZURE_TENANT_ID}"
 AUTH_URL = f"{AUTHORITY}/oauth2/v2.0/authorize"
 TOKEN_URL = f"{AUTHORITY}/oauth2/v2.0/token"
+JWKS_URL = f"https://login.microsoftonline.com/{oauth_settings.AZURE_TENANT_ID}/discovery/v2.0/keys"
 
 # Role hierarchy mapping: which roles can fulfill which scopes
 ROLE_HIERARCHY = {
@@ -33,7 +37,7 @@ query_params = {
     "client_id": oauth_settings.AZURE_CLIENT_ID,
     "response_type": "code",
     "redirect_uri": oauth_settings.REDIRECT_URI,
-    "scope": "api://6e1bf81c-ef36-40c4-b9f6-0853d397326a/Heroes.Create",
+    "scope": "openid profile email User.Read",
     "response_mode": "query"
 }
 
@@ -42,6 +46,89 @@ login_url = f"https://login.microsoftonline.com/{oauth_settings.AZURE_TENANT_ID}
 
 # Open the login URL in the default web browser
 webbrowser.open_new_tab(login_url)  # This opens the login URL in a new browser tab
+
+
+async def handle_openid_connect_flow(code: str):
+    """
+    Handle OpenID Connect flow by exchanging the authorization code for tokens,
+    decoding the ID token, and verifying the token.
+    """
+    # Exchange the authorization code for access and ID tokens
+    try:
+        logger.info("Attempting to request access token")
+        token = await get_access_token(code)  # Function that exchanges code for token
+        logger.info("Attempting to fetch id_token from token")
+        id_token = token.get("id_token")
+        logger.info("Attempting to fetch access_token from token")
+        access_token = token.get("access_token")
+
+        if not id_token:
+            raise HTTPException(status_code=400, detail="ID token not found in response")
+
+        # Decode the ID token without verifying the signature first
+        decoded_id_token = jwt.decode(id_token, options={"verify_signature": False}, algorithms=["RS256"])
+        print("Decoded ID Token:", decoded_id_token)
+
+        # Decode the access token without verifying the signature first
+        decoded_access_token = jwt.decode(access_token, options={"verify_signature": False}, algorithms=["RS256"])
+        print("Decoded access Token:", decoded_access_token)
+
+        # Verify the ID token signature and its claims
+        # verified_token = await verify_id_token(id_token)
+        # print("Verified ID Token:", verified_token)
+
+        return {
+            "access_token": decoded_access_token,
+            "id_token": decoded_id_token
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+async def verify_id_token(id_token: str):
+    """
+    Verify the ID token using the JWKS from the Microsoft Identity platform.
+    """
+    logger.info("Starting ID token verification.")
+
+    try:
+        # Fetch the JWKS (JSON Web Key Set) asynchronously from the provider
+        logger.info("Fetching JWKS from %s", JWKS_URL)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(JWKS_URL)
+            response.raise_for_status()  # Raise an exception for HTTP errors
+            jwks = response.json()
+            logger.info("Successfully fetched JWKS: %s", jwks)  # Log the JWKS data (consider redacting sensitive info)
+
+        # Get the public key ID from the token header
+        logger.info("Extracting 'kid' from the token header.")
+        kid = jwt.get_unverified_header(id_token)["kid"]
+        logger.info("Public key ID (kid): %s", kid)
+
+        # Find the corresponding public key in the JWKS
+        logger.info("Searching for matching key in JWKS.")
+        rsa_key = next(key for key in jwks["keys"] if key["kid"] == kid)
+        logger.info("Found matching key for kid: %s", kid)
+
+        # Use the RSA public key to verify the token's signature and validate claims
+        logger.info("Verifying the ID token signature and validating claims.")
+        verified_token = jwt.decode(id_token, rsa_key, algorithms=["RS256"], audience=oauth_settings.AZURE_CLIENT_ID)
+        logger.info("ID token verified successfully.")
+
+        return verified_token
+
+    except jwt.ExpiredSignatureError:
+        logger.error("ID token has expired.")
+        raise HTTPException(status_code=403, detail="ID token has expired.")
+    except jwt.JWTClaimsError as claims_error:
+        logger.error("Invalid claims in ID token: %s", claims_error)
+        raise HTTPException(status_code=403, detail="Invalid claims in ID token.")
+    except httpx.HTTPStatusError as http_error:
+        logger.error("HTTP error while fetching JWKS: %s", http_error)
+        raise HTTPException(status_code=403, detail="Could not validate credentials.")
+    except Exception as e:
+        logger.error("An unexpected error occurred during ID token verification: %s", str(e))
+        raise HTTPException(status_code=403, detail="Could not validate credentials.")
 
 
 async def get_access_token(code: str):
@@ -70,7 +157,6 @@ async def get_access_token(code: str):
             # Parse the response JSON
             response_data = response.json()
 
-            # Log the response data (be careful not to log sensitive information such as token directly)
             logger.info(f"Response data: {response_data}")
 
             # Check if the response contains an error
@@ -78,11 +164,7 @@ async def get_access_token(code: str):
                 logger.error(f"Failed to exchange code for token. Error: {response_data}")
                 raise HTTPException(status_code=response.status_code, detail=response_data)
 
-            # Log successful token retrieval
-            access_token = response_data.get("access_token")
-            logger.info(f"Access token received: {access_token[:10]}... (truncated for security)")
-
-            return access_token
+            return response_data
 
         except Exception as e:
             # Log any exceptions that occur during the process

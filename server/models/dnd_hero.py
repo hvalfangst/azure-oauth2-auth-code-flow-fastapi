@@ -1,11 +1,11 @@
-# app/models/dnd_hero.py
+# server/models/dnd_hero.py
 
 from pydantic import BaseModel
 from typing import List, Optional
-from app.models.ability_scores import AbilityScores
-from app.models.equipment import Equipment
-from app.models.skill_proficiencies import SkillProficiencies
-from app.models.spell import Spell
+from client.models.ability_scores import AbilityScores
+from client.models.equipment import Equipment
+from client.models.skill_proficiencies import SkillProficiencies
+from client.models.spell import Spell
 
 
 class DnDHero(BaseModel):

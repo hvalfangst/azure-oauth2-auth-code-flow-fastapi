@@ -1,4 +1,4 @@
-# app/logger.py
+# server/logger.py
 
 import logging
 

@@ -1,7 +1,7 @@
-# token_storage.py
+# client/services/token_storage.py
 
 # Global variable to hold the token and claims
-from app.logger import logger
+from client.logger import logger
 
 DECODED_TOKEN = None
 ACCESS_TOKEN = None

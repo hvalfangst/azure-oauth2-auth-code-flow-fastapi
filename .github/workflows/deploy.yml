@@ -20,11 +20,11 @@ jobs:
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install -r app/requirements.txt
+          pip install -r server/requirements.txt
 
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-          package: .
+          package: ./server
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}

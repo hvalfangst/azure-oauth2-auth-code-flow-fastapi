@@ -1,6 +1,7 @@
-# app/models/skill_proficiencies.py
+# client/models/skill_proficiencies.py
 
 from pydantic import BaseModel
+
 
 class SkillProficiencies(BaseModel):
     acrobatics: bool = False

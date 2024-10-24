@@ -1,4 +1,4 @@
-# app/models/__init__.py
+# client/models/__init__.py
 
 from .dnd_hero import DnDHero, AbilityScores, SkillProficiencies, Equipment, Spell
 

@@ -1,4 +1,4 @@
-# app/models/equipment.py
+# server/models/equipment.py
 
 from typing import Optional, List
 from pydantic import BaseModel

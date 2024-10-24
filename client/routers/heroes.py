@@ -1,13 +1,14 @@
-# routes/hero_routes.py
+# client/routers/heroes.py
+
 from http.client import HTTPException
 from typing import List
 
 from fastapi import APIRouter
 from fastapi import HTTPException
 
-from app.models.dnd_hero import DnDHero
-from app.services.auth_service import verify_scope
-from app.services.hero_service import HeroService
+from client.models.dnd_hero import DnDHero
+from client.services.auth_service import verify_scope
+from client.services.hero_service import HeroService
 
 router = APIRouter()
 hero_service = HeroService()

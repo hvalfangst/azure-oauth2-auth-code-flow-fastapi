@@ -1,16 +1,18 @@
-# app/api/services/hero_service.py
+# server/services/hero_service.py
 
 from typing import List, Optional
-from app.models.dnd_hero import DnDHero
+from server.models.dnd_hero import DnDHero
 import uuid
 import asyncio
-from app.logger import logger
+from server.logger import logger
 
 
 class HeroService:
     def __init__(self):
+
         # In-memory structure to store heroes
         self.heroes_db: List[DnDHero] = []
+
         # Lock to handle concurrent access
         self.lock = asyncio.Lock()
 

@@ -1,4 +1,4 @@
-# app/models/ability_scores.py
+# client/models/ability_scores.py
 
 from pydantic import BaseModel
 

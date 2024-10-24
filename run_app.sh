@@ -22,8 +22,8 @@ pip install --upgrade pip
 
 # Install dependencies from requirements.txt
 echo "Installing dependencies from requirements.txt..."
-pip install -r app/requirements.txt
+pip install -r server/requirements.txt
 
 # Run the FastAPI application using uvicorn
 echo "Starting FastAPI application..."
-python -m uvicorn app.main:app --reload
+python -m uvicorn server.main:app --reload

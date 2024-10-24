@@ -1,8 +1,7 @@
-# app/main.py
+# client/main.py
 
 from fastapi import FastAPI
-
-from app.routers import auth, heroes
+from client.routers import auth, heroes
 
 app = FastAPI(
     title="Hero API",

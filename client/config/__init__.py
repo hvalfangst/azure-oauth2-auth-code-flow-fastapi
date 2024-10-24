@@ -1,4 +1,4 @@
-# app/config/__init__.py
+# client/config/__init__.py
 
 from .oauth import oauth_settings
 

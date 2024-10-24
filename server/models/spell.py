@@ -1,4 +1,4 @@
-# app/models/spell.py
+# server/models/spell.py
 
 from typing import List
 from pydantic import BaseModel

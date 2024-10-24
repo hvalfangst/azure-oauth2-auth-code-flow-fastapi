@@ -1,8 +1,8 @@
 # Azure OAuth2 OIDC Auth Code Flow demonstration
 
 The goal of this repository is to demonstrate how to incorporate [OAuth 2.0](https://datatracker.ietf.org/doc/html/rfc6749) on Azure **WITHOUT** the use of [MSAL](https://learn.microsoft.com/en-us/entra/identity-platform/msal-overview) for learning purposes.
-In a production environment one should (almost) always use MSAL or similar battle-tested libraries, but it is vital for any software engineer to understand what is going on under the hood instead of just blindly calling a library which
-automagically solves all your needs (this also applies for frameworks).
+In a production environment one should (almost) always use MSAL or similar battle-tested libraries, but it is vital for any engineer to understand what is going on under the hood instead of just blindly calling a library which
+automagically solves all your needs.
 
 The repo contains code for both the client and the server. The client is utilizing [OpenID Connect (OIDC)](https://auth0.com/docs/authenticate/protocols/openid-connect-protocol) with 
 Auth code flow. A comprehensive guide is included on how to register the client and server on Azure Entra ID. 
