@@ -1,9 +1,3 @@
 fastapi==0.115.2        # FastAPI framework for building APIs
 uvicorn==0.32.0         # ASGI server for running FastAPI apps
 pydantic==2.9.2         # Data validation and parsing for FastAPI models
-config~=0.5.1
-dotenv~=0.0.5
-python-dotenv==1.0.1
-httpx==0.27.2
-jwt==1.3.1
-pydantic_settings==2.6.0
